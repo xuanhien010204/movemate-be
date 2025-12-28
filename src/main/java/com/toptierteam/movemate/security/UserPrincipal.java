@@ -21,9 +21,15 @@ public class UserPrincipal implements UserDetails {
     private Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = Collections.singletonList(
-            new SimpleGrantedAuthority("ROLE_USER")
-        );
+        List<GrantedAuthority> authorities = new ArrayList<>();
+
+        // Add role from User entity (avoid lazy loading roles collection)
+        if (user.getRole() != null) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        } else {
+            // Default role if not set
+            authorities.add(new SimpleGrantedAuthority("ROLE_CUSTOMER"));
+        }
 
         return new UserPrincipal(
             user.getId(),
